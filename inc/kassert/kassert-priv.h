@@ -24,6 +24,7 @@
 #endif
 
 #include "kassert-primitive-fmt.h"
+#include "kassert-diag.h"
 
 #include <stdbool.h>
 
@@ -57,11 +58,40 @@ const char* __kassert_create_print_fmt(const char* label,
 #define KASSERT_PRIV_CREATE_LABEL(val1, val2, op) \
     TOSTRING(val1) " " TOSTRING(op) " " TOSTRING(val2)
 
+
+/*
+    Macro is using strict type checking with some exceptions:
+    1. If both types are pointers then pointer are compatible. Because for comparision we can use just void*
+    2. If one of the variable is a bool variable then
+        2.1 Second val is a variable, then make type checking
+        2.2 Second val is a const value, then check if can be converted to bool (is equal 0 or 1)
+        2.3 First value is a const value and second value is a const value, they cannot by bool, because of promotion to int
+
+    Plese note that _Static_assert need all of branches be compile expressions.
+    That's why I use val1 / val2 instead of _ktest_val. But no worries. __typeof__ / sizeof are safe
+    ++i, i++ will be ignored under those compiler "operators"
+*/
 #define KASSERT_PRIV_OP(val1, val2, op) \
     do { \
+        KASSERT_DIAG_PUSH() \
+        KASSERT_DIAG_IGNORE("-Wfloat-equal") \
         const __typeof__(val1) _kassert_val1 = (val1); \
         const __typeof__(val2) _kassert_val2 = (val2); \
-        (void)(&_kassert_val1 - &_kassert_val2); \
+        _Static_assert(__builtin_choose_expr(KASSERT_PRIMITIVES_PROBABLY_POINTER(_kassert_val1) && KASSERT_PRIMITIVES_PROBABLY_POINTER(_kassert_val2), \
+                                             1, \
+                                             __builtin_choose_expr(KASSERT_PRIMITIVE_GET_TYPE(_kassert_val1) == KASSERT_PRIMITIVES_BOOL || KASSERT_PRIMITIVE_GET_TYPE(_kassert_val2) == KASSERT_PRIMITIVES_BOOL, \
+                                                                   1, \
+                                                                   __builtin_types_compatible_p(__typeof__(val1), __typeof__(val2)))), \
+                       "Uncompatible types"); \
+        _Static_assert(__builtin_choose_expr(KASSERT_PRIMITIVE_GET_TYPE(_kassert_val1) == KASSERT_PRIMITIVES_BOOL || KASSERT_PRIMITIVE_GET_TYPE(_kassert_val2) == KASSERT_PRIMITIVES_BOOL, \
+                                             __builtin_choose_expr(__builtin_constant_p(val1), \
+                                                                   val1 == (__typeof__(val1))false || val1 == (__typeof__(val1))true, \
+                                                                   __builtin_choose_expr(__builtin_constant_p(val2), \
+                                                                                         val2 == (__typeof__(val2))false || val2 == (__typeof__(val2))true, \
+                                                                                         1) \
+                                                                  ), \
+                                             1), \
+                           "Implicit convertion to bool"); \
         if (!((_kassert_val1) op (_kassert_val2))) \
         { \
             const char* const fmt = \
@@ -77,6 +107,7 @@ const char* __kassert_create_print_fmt(const char* label,
                                      _kassert_val1, \
                                      _kassert_val2); \
         } \
+        KASSERT_DIAG_POP() \
     } while (0)
 
 #define KASSERT_PRIV_EQ(val1, val2)  KASSERT_PRIV_OP(val1, val2, ==)

@@ -147,12 +147,12 @@ You want to install KAssert in external/Kassert directory.
  * /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf3) [0x7f9ca0f7d0b3]
  * ./main(_start+0x2e) [0x55f99f4571ce
  */
-#define KASSERT_EQ(val1, val2)  KASSERT_PRIV_EQ(val1, val2)
-#define KASSERT_NEQ(val1, val2) KASSERT_PRIV_NEQ(val1, val2)
-#define KASSERT_GT(val1, val2)  KASSERT_PRIV_GT(val1, val2)
-#define KASSERT_GEQ(val1, val2) KASSERT_PRIV_GEQ(val1, val2)
-#define KASSERT_LT(val1, val2)  KASSERT_PRIV_LT(val1, val2)
-#define KASSERT_LEQ(val1, val2) KASSERT_PRIV_LEQ(val1, val2)
+#define KASSERT_EQ(val1, val2)    KASSERT_PRIV_EQ(val1, val2)
+#define KASSERT_NEQ(val1, val2)   KASSERT_PRIV_NEQ(val1, val2)
+#define KASSERT_GT(val1, val2)    KASSERT_PRIV_GT(val1, val2)
+#define KASSERT_GEQ(val1, val2)   KASSERT_PRIV_GEQ(val1, val2)
+#define KASSERT_LT(val1, val2)    KASSERT_PRIV_LT(val1, val2)
+#define KASSERT_LEQ(val1, val2)   KASSERT_PRIV_LEQ(val1, val2)
 
 /**
  * This works in the same way as normal assert from assert.h
@@ -174,7 +174,17 @@ You want to install KAssert in external/Kassert directory.
  * /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf3) [0x7f16d28890b3]
  * ./main(_start+0x2e) [0x5643089a61ce]
  */
-#define KASSERT(cond)           KASSERT_PRIV_COND(cond)
+#define KASSERT(cond)             KASSERT_PRIV_COND(cond)
+
+/**
+ * Use this macro to check if pointer is not null
+ */
+#define KASSERT_PTR_NOT_NULL(ptr) KASSERT_NEQ(ptr, (void *)0)
+
+/**
+ * Use this macro to check if pointer is null
+ */
+#define KASSERT_PTR_NULL(ptr)     KASSERT_EQ(ptr, (void *)0)
 ````
 
 ## Example
@@ -222,6 +232,15 @@ static void example1(void)
 
     /* You can pass expressions but type must be the same */
     KASSERT_LEQ(get41() + 1, get41());
+
+    /*
+        true / false is not a bool :(, that's why type checking is disabling a little bit for booleans
+        When one of the variable is bool then other variable have to be bool
+        When one of the variable is bool then constant value can be 1 (true) or 0 (false)
+    */
+    bool b_val = false;
+    KASSERT_EQ(b_val, true);
+    /* KASSERT_EQ(b_val, 100); */
 }
 
 /* Please note, that KASSERT terminates program, so comment assert to see another */
@@ -233,6 +252,15 @@ static void example2(void)
 
     /* You can pass here all you want, like to normal assert */
     KASSERT(ptr != NULL && *ptr != 0);
+
+    /* Pointers have disabled type checking. Pointer is a pointer :) */
+    KASSERT_EQ(ptr, NULL);
+
+    /* Cannot compare pointer with non-pointer types */
+    /* KASSERT_EQ(t, 0xdead); */
+
+    KASSERT_PTR_NOT_NULL(ptr);
+    KASSERT_PTR_NULL(ptr);
 }
 
 int main(void)

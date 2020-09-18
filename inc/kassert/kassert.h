@@ -75,12 +75,12 @@
  * /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf3) [0x7f9ca0f7d0b3]
  * ./main(_start+0x2e) [0x55f99f4571ce
  */
-#define KASSERT_EQ(val1, val2)  KASSERT_PRIV_EQ(val1, val2)
-#define KASSERT_NEQ(val1, val2) KASSERT_PRIV_NEQ(val1, val2)
-#define KASSERT_GT(val1, val2)  KASSERT_PRIV_GT(val1, val2)
-#define KASSERT_GEQ(val1, val2) KASSERT_PRIV_GEQ(val1, val2)
-#define KASSERT_LT(val1, val2)  KASSERT_PRIV_LT(val1, val2)
-#define KASSERT_LEQ(val1, val2) KASSERT_PRIV_LEQ(val1, val2)
+#define KASSERT_EQ(val1, val2)    KASSERT_PRIV_EQ(val1, val2)
+#define KASSERT_NEQ(val1, val2)   KASSERT_PRIV_NEQ(val1, val2)
+#define KASSERT_GT(val1, val2)    KASSERT_PRIV_GT(val1, val2)
+#define KASSERT_GEQ(val1, val2)   KASSERT_PRIV_GEQ(val1, val2)
+#define KASSERT_LT(val1, val2)    KASSERT_PRIV_LT(val1, val2)
+#define KASSERT_LEQ(val1, val2)   KASSERT_PRIV_LEQ(val1, val2)
 
 /**
  * This works in the same way as normal assert from assert.h
@@ -102,7 +102,17 @@
  * /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf3) [0x7f16d28890b3]
  * ./main(_start+0x2e) [0x5643089a61ce]
  */
-#define KASSERT(cond)           KASSERT_PRIV_COND(cond)
+#define KASSERT(cond)             KASSERT_PRIV_COND(cond)
+
+/**
+ * Use this macro to check if pointer is not null
+ */
+#define KASSERT_PTR_NOT_NULL(ptr) KASSERT_NEQ(ptr, (void *)0)
+
+/**
+ * Use this macro to check if pointer is null
+ */
+#define KASSERT_PTR_NULL(ptr)     KASSERT_EQ(ptr, (void *)0)
 
 /**
  * When you have assert in your code and want to use KASSERT instead of, pass this define to compiler
@@ -135,6 +145,10 @@
 #define KASSERT_LEQ(val1, val2)
 
 #define KASSERT(cond)
+
+#define KASSERT_PTR_NOT_NULL(ptr)
+
+#define KASSERT_PTR_NULL(ptr)
 
 #endif /* ifndef NDEBUG */
 

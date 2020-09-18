@@ -41,6 +41,15 @@ static void example1(void)
 
     /* You can pass expressions but type must be the same */
     KASSERT_LEQ(get41() + 1, get41());
+
+    /*
+        true / false is not a bool :(, that's why type checking is disabling a little bit for booleans
+        When one of the variable is bool then other variable have to be bool
+        When one of the variable is bool then constant value can be 1 (true) or 0 (false)
+    */
+    bool b_val = false;
+    KASSERT_EQ(b_val, true);
+    /* KASSERT_EQ(b_val, 100); */
 }
 
 /* Please note, that KASSERT terminates program, so comment assert to see another */
@@ -52,6 +61,15 @@ static void example2(void)
 
     /* You can pass here all you want, like to normal assert */
     KASSERT(ptr != NULL && *ptr != 0);
+
+    /* Pointers have disabled type checking. Pointer is a pointer :) */
+    KASSERT_EQ(ptr, NULL);
+
+    /* Cannot compare pointer with non-pointer types */
+    /* KASSERT_EQ(t, 0xdead); */
+
+    KASSERT_PTR_NOT_NULL(ptr);
+    KASSERT_PTR_NULL(ptr);
 }
 
 int main(void)
