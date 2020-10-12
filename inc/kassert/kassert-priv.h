@@ -75,6 +75,7 @@ const char* __kassert_create_print_fmt(const char* label,
     do { \
         KASSERT_DIAG_PUSH() \
         KASSERT_DIAG_IGNORE("-Wfloat-equal") \
+        KASSERT_DIAG_IGNORE("-Wint-to-void-pointer-cast") \
         const __typeof__(val1) _kassert_val1 = (val1); \
         const __typeof__(val2) _kassert_val2 = (val2); \
         _Static_assert(__builtin_choose_expr(KASSERT_PRIMITIVES_PROBABLY_POINTER(_kassert_val1) && KASSERT_PRIMITIVES_PROBABLY_POINTER(_kassert_val2), \
@@ -92,7 +93,7 @@ const char* __kassert_create_print_fmt(const char* label,
                                                                   ), \
                                              1), \
                            "Implicit convertion to bool"); \
-        if (!((_kassert_val1) op (_kassert_val2))) \
+        if (!((__builtin_choose_expr(KASSERT_PRIMITIVES_PROBABLY_POINTER(_kassert_val1), (void *)(long)_kassert_val1, _kassert_val1)) op (__builtin_choose_expr(KASSERT_PRIMITIVES_PROBABLY_POINTER(_kassert_val2), (void *)(long)_kassert_val2, _kassert_val2)))) \
         { \
             const char* const fmt = \
                 __kassert_create_print_fmt(KASSERT_PRIV_CREATE_LABEL(val1, val2, op), \

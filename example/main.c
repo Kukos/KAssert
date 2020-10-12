@@ -70,6 +70,11 @@ static void example2(void)
 
     KASSERT_PTR_NOT_NULL(ptr);
     KASSERT_PTR_NULL(ptr);
+
+    /* You can also check pointer to function as well */
+    typedef void (*func_f)(int a, int b);
+    func_f func = NULL;
+    KASSERT_PTR_NULL(func);
 }
 
 int main(void)
