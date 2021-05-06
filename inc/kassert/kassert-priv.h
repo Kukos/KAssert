@@ -75,7 +75,7 @@ const char* __kassert_create_print_fmt(const char* label,
     do { \
         KASSERT_DIAG_PUSH() \
         KASSERT_DIAG_IGNORE("-Wfloat-equal") \
-        KASSERT_DIAG_IGNORE("-Wint-to-void-pointer-cast") \
+        KASSERT_DIAG_IGNORE("-Wint-to-pointer-cast") \
         const __typeof__(val1) _kassert_val1 = (val1); \
         const __typeof__(val2) _kassert_val2 = (val2); \
         _Static_assert(__builtin_choose_expr(KASSERT_PRIMITIVES_PROBABLY_POINTER(_kassert_val1) && KASSERT_PRIMITIVES_PROBABLY_POINTER(_kassert_val2), \
